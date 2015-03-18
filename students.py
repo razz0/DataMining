@@ -1,6 +1,4 @@
-'''
-A module for handling Data Mining 2015 course data set.
-'''
+'''A module for handling Data Mining 2015 course data set.'''
 
 import re
 

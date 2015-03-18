@@ -3,15 +3,13 @@ Doctests for students.py.
 
 >>> import students as s
 >>> s.read_students()
->>> a = set(['Ohjelmoinnin perusteet'])
->>> print len(s.filter_students_by_courses(s.students, a))
+>>> print len(s.filter_students_by_courses(s.students, s.OHJ_PER))
 1200
->>> b = set([('Ohjelmoinnin jatkokurssi', 'Java-ohjelmointi')])  # Two possible names for single course
->>> print len(s.filter_students_by_courses(s.students, b, grades=s.PASSED_GRADES))
+>>> print len(s.filter_students_by_courses(s.students, s.OHJ_JAT, grades=s.PASSED_GRADES))
 856
->>> print len(s.filter_students_by_courses(s.students, a | b))
+>>> print len(s.filter_students_by_courses(s.students, s.OHJ_PER | s.OHJ_JAT))
 983
->>> print "%.3f - %.3f" % s.rule_implication(a, b)
+>>> print "%.3f - %.3f" % s.rule_implication(s.OHJ_PER, s.OHJ_JAT)
 0.342 - 0.819
 
 Test Student class:
