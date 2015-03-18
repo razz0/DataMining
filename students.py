@@ -125,12 +125,12 @@ def support_count(course_set, studs=students, grades=()):
 
 def support(course_set, studs=students, grades=()):
     '''Calculate support for an (enhanced) itemset'''
-    return float(support_count(course_set, studs=studs, grades=grades)) / float(len(studs))
+    return support_count(course_set, studs=studs, grades=grades) / float(len(studs))
 
 
 def rule_implication(a, b):
     '''
     Check how much itemset a implies itemset b. Returns support and confidence as a tuple.
     '''
-    return support(a | b), float(support_count(a | b)) / float(support_count(a))
+    return support(a | b), support_count(a | b) / float(support_count(a))
 
