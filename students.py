@@ -12,7 +12,8 @@ course_names = set()
 students = []
 
 OHJ_PER = set(['Ohjelmoinnin perusteet'])
-OHJ_JAT = set([('Ohjelmoinnin jatkokurssi', 'Java-ohjelmointi')])
+OHJ_JAT = set(['Ohjelmoinnin jatkokurssi'])
+OHJ_JAT2 = set([('Ohjelmoinnin jatkokurssi', 'Java-ohjelmointi')])
 
 
 def read_students():
