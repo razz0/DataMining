@@ -2,9 +2,8 @@
 
 import re
 
-ALL_GRADES = set([
-    '0', '1', '2', '3', '4', '5', 'CL', 'ECLA', 'Eisa', 'HT', 'Hyl.', 'Hyv.', 'L', 'LUB', 'Luop', 'MCLA', 'NSLA', 'TT'])
-FAILED_GRADES = set(['Hyl.', 'Eisa', 'Luop'])
+ALL_GRADES = set(['0', '1', '2', '3', '4', '5'])
+FAILED_GRADES = set(['0'])
 # PASSED_GRADES = ['1', '2', '3', '4', '5', 'Hyv.', 'HT', 'TT']
 PASSED_GRADES = ALL_GRADES - FAILED_GRADES
 
