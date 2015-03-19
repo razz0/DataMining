@@ -17,15 +17,15 @@ OHJ_JAT2 = set([('Ohjelmoinnin jatkokurssi', 'Java-ohjelmointi')])
 
 
 def read_students():
-    '''
-    Read all student information
-    '''
+    '''Read all student information from file'''
+
     f = open("data.txt", "r")
     lines = f.readlines()
     f.close()
 
     def _parse_student_row(row):
         '''Parse a row'''
+
         reg_year, row = row.split(' ', 1)
         row += ' '  # For unpacking rows last split
 
@@ -58,9 +58,7 @@ def read_students():
 
 
 class Student(object):
-    '''
-    Single student course history
-    '''
+    '''Single student course history'''
 
     def __init__(self, reg_time):
         self.registration_year = reg_time
@@ -121,17 +119,18 @@ def filter_students_by_courses(studs, courses, grades=(), timespan=()):
 
 def support_count(course_set, studs=students, grades=()):
     '''Measure support count for an (enhanced) itemset'''
+
     return len(filter_students_by_courses(studs, course_set, grades=grades))
 
 
 def support(course_set, studs=students, grades=()):
     '''Calculate support for an (enhanced) itemset'''
+
     return support_count(course_set, studs=studs, grades=grades) / float(len(studs))
 
 
 def rule_implication(a, b):
-    '''
-    Check how much itemset a implies itemset b. Returns support and confidence as a tuple.
-    '''
+    '''Check how much itemset a implies itemset b. Returns support and confidence as a tuple.'''
+
     return support(a | b), support_count(a | b) / float(support_count(a))
 

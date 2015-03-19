@@ -4,13 +4,13 @@ Doctests for students.py.
 >>> import students as s
 >>> s.read_students()
 >>> print len(s.filter_students_by_courses(s.students, s.OHJ_PER))
-1200
+574
 >>> print len(s.filter_students_by_courses(s.students, s.OHJ_JAT2, grades=s.PASSED_GRADES))
-856
+500
 >>> print len(s.filter_students_by_courses(s.students, s.OHJ_PER | s.OHJ_JAT2))
-983
+467
 >>> print "%.3f - %.3f" % s.rule_implication(s.OHJ_PER, s.OHJ_JAT2)
-0.342 - 0.819
+0.298 - 0.814
 
 Test Student class:
 
