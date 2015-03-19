@@ -5,11 +5,11 @@ Doctests for students.py.
 >>> s.read_students()
 >>> print len(s.filter_students_by_courses(s.students, s.OHJ_PER))
 1200
->>> print len(s.filter_students_by_courses(s.students, s.OHJ_JAT, grades=s.PASSED_GRADES))
+>>> print len(s.filter_students_by_courses(s.students, s.OHJ_JAT2, grades=s.PASSED_GRADES))
 856
->>> print len(s.filter_students_by_courses(s.students, s.OHJ_PER | s.OHJ_JAT))
+>>> print len(s.filter_students_by_courses(s.students, s.OHJ_PER | s.OHJ_JAT2))
 983
->>> print "%.3f - %.3f" % s.rule_implication(s.OHJ_PER, s.OHJ_JAT)
+>>> print "%.3f - %.3f" % s.rule_implication(s.OHJ_PER, s.OHJ_JAT2)
 0.342 - 0.819
 
 Test Student class:
