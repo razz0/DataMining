@@ -7,7 +7,7 @@ FAILED_GRADES = set(['0'])
 # PASSED_GRADES = ['1', '2', '3', '4', '5', 'Hyv.', 'HT', 'TT']
 PASSED_GRADES = ALL_GRADES - FAILED_GRADES
 
-course_names = set()
+all_courses = set()
 students = []
 
 OHJ_PER = set(['Ohjelmoinnin perusteet'])
@@ -53,7 +53,7 @@ def read_students():
 
         for course in courses:
             student.add_course(*course)
-            course_names.add(course[2])
+            all_courses.add((course[1], course[2]))
 
 
 class Student(object):
