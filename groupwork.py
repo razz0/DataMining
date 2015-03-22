@@ -20,7 +20,10 @@ for courseset in INTERESTING_COURSESETS:
 
 print
 
-for courseset in [s.OHJ_PER, s.OHJ_JAT, s.OHJ_JAT2]:
+def _compare_time(x, y):
+    return cmp(x['time'], y['time'])
+
+for courseset in [s.OHJ_PER, s.OHJ_JAT2]:
     coursename = list(courseset)[0] if len(courseset) == 1 else list(courseset)
 
     failed_old = s.filter_students_by_courses(s.students, courseset, grades=s.FAILED_GRADES, timespan=OLD_TIME)
@@ -29,21 +32,28 @@ for courseset in [s.OHJ_PER, s.OHJ_JAT, s.OHJ_JAT2]:
     passed_old_grades = []
     passed_new_grades = []
 
+    retries_old_old = []
+    retries_old_new = []
+    retries_new_new = []
+
     for stud in failed_old:
-        failed_attempts = stud.get_course_by_name(courseset, grades=s.FAILED_GRADES, timespan=OLD_TIME)
-        first_fail = min([fail['time'] for fail in failed_attempts])
+        failed_attempts = stud.get_course_by_name(coursename, grades=s.FAILED_GRADES, timespan=OLD_TIME)
+        fail_times = sorted([fail['time'] for fail in failed_attempts])
 
-        # TODO: Fix error
-
-        passed_old_attempts = stud.get_course_by_name(courseset, grades=s.PASSED_GRADES, timespan=(first_fail, OLD_TIME[1]))
-        passed_new_attempts = stud.get_course_by_name(courseset, grades=s.PASSED_GRADES, timespan=NEW_TIME)
+        passed_old_attempts = sorted(
+            stud.get_course_by_name(coursename, grades=s.PASSED_GRADES, timespan=(fail_times[0], OLD_TIME[1])),
+            cmp=_compare_time)
+        passed_new_attempts = sorted(
+            stud.get_course_by_name(coursename, grades=s.PASSED_GRADES, timespan=NEW_TIME), cmp=_compare_time)
 
         if passed_old_attempts:
-            passed_old_grades.append([int(c['grade']) for c in
-                                      sorted(passed_old_attempts, cmp=lambda x, y: cmp(x['time'], y['time']))][0])
+            passed_old_grades.append([int(c['grade']) for c in passed_old_attempts][0])
         elif passed_new_attempts:
-            passed_new_grades.append([int(c['grade']) for c in
-                                      sorted(passed_new_attempts, cmp=lambda x, y: cmp(x['time'], y['time']))][0])
+            passed_new_grades.append([int(c['grade']) for c in passed_new_attempts][0])
+
+        #if len(fail_times) > 1 and fail_times[1] < passed_old_attempts[0]['time']:
+        #    retries_old_old.append('fail')
+        #elif
 
     print 'Average grade of failing participants of OLD %s eventually passing OLD course: %.3f' % \
           (coursename, sum(passed_old_grades) / float(len(passed_old_grades)))
@@ -53,14 +63,14 @@ for courseset in [s.OHJ_PER, s.OHJ_JAT, s.OHJ_JAT2]:
     passed_new_grades = []
 
     for stud in failed_new:
-        failed_attempts = stud.get_course_by_name(courseset, grades=s.FAILED_GRADES, timespan=NEW_TIME)
+        failed_attempts = stud.get_course_by_name(coursename, grades=s.FAILED_GRADES, timespan=NEW_TIME)
         first_fail = min([fail['time'] for fail in failed_attempts])
 
-        passed_new_attempts = stud.get_course_by_name(courseset, grades=s.PASSED_GRADES, timespan=(first_fail, NEW_TIME[1]))
+        passed_new_attempts = stud.get_course_by_name(coursename, grades=s.PASSED_GRADES, timespan=(first_fail, NEW_TIME[1]))
 
         if passed_new_attempts:
             passed_new_grades.append([int(c['grade']) for c in
-                                      sorted(passed_new_attempts, cmp=lambda x, y: cmp(x['time'], y['time']))][0])
+                                      sorted(passed_new_attempts, cmp=_compare_time)][0])
 
     print 'Average grade of failing participants of NEW %s eventually passing NEW course: %.3f' % \
           (coursename, sum(passed_new_grades) / float(len(passed_new_grades)))

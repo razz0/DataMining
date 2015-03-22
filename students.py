@@ -74,7 +74,7 @@ class Student(object):
         '''
         Get course dict by course name. Filter by grades and timespan.
 
-        :param c_name: course name as string, also accepts tuples to allow for multiple names of single course
+        :param c_name: course name as string OR tuple to allow for multiple names of single course
         :param grades: list of grades to use
         :param timespan: timespan start and end as tuple
         :rtype: list[dict]
