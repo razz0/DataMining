@@ -134,33 +134,3 @@ def rule_implication(a, b):
     return support(a | b), support_count(a | b) / float(support_count(a))
 
 
-def apriori(courses, minsup):
-
-    def _apriori_gen(itemset):
-        if len(a) != len(b):
-            return
-        for k in range(0, len(a)-1):
-            if not a[k] == b[k]:
-                return
-        k = len(a)
-        if not a[k] == b[k]:
-            return
-        return a | b
-
-    def _prune(itemset):
-        new_itemset = set()
-        for item in itemset:
-            if support_count(item) < minsup:
-                new_itemset.add(item)
-        return new_itemset
-
-    length = 1
-    itemsets = _prune([frozenset([c[1]]) for c in courses])
-
-    while itemsets:
-        length += 1
-        itemsets = set([i.union(j) for i in itemsets for j in itemsets if len(i.union(j)) == length])
-        itemsets = _prune(itemsets)
-        print itemsets
-
-
