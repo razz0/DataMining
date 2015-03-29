@@ -10,17 +10,44 @@ def support_count(itemset, transactions):
     :param itemset: set of items to measure support count for
     :param transactions: list of sets (all transactions)
 
+    >>> simple_transactions = ['ABC', 'BC', 'BD', 'D']
+    >>> [support_count(item, simple_transactions) for item in 'ABCDE']
+    [1, 3, 2, 2, 0]
     >>> some_transactions = [set(['beer', 'bread', 'milk']), set(['beer']), set(['milk'])]
-    >>> support_count(set(['beer', 'bread', 'milk']), some_transactions)
-    1
     >>> support_count(set(['beer']), some_transactions)
-    2
-    >>> support_count(set(['bread']), some_transactions)
-    1
-    >>> support_count(set(['milk']), some_transactions)
     2
     """
     return len([row for row in transactions if set(itemset) <= set(row)])
+
+
+def _apriori_gen(frequent_sets):
+    """
+    Generate candidate itemsets
+
+    :param frequent_sets: ORDERED list of k-1 frequent itemsets
+
+    >>> _apriori_gen(['A', 'B', 'C'])
+    ['AB', 'AC', 'BC']
+    >>> _apriori_gen(['AB', 'AC', 'BC'])
+    ['ABC']
+    >>> _apriori_gen(['ABC', 'ABD', 'ABE', 'ACD', 'BCD', 'BCE', 'CDE'])
+    ['ABCD', 'ABCE', 'ABDE', 'BCDE']
+    """
+    new_candidates = []
+    for index, frequent_item in enumerate(frequent_sets):
+        #addition = 1
+        #if index + addition == len(frequent_sets) and frequent_item[:-1] == frequent_sets[index + addition][:-1]:
+        #    new_candidates.append(frequent_item + frequent_sets[index + addition][-1])
+        #    addition += 1
+        for next_item in frequent_sets[index + 1:]:
+            if len(frequent_item) == 1:
+                new_candidates.append(frequent_item + next_item)
+            elif frequent_item[:-1] == next_item[:-1]:
+                new_candidates.append(frequent_item + next_item[-1])
+            else:
+                break
+
+    return new_candidates
 
 
 def apriori(transactions, itemset, minsup):
@@ -31,56 +58,41 @@ def apriori(transactions, itemset, minsup):
     :param itemset: set of all items
     :param minsup: minimum support
 
-    >>> some_transactions = [set(['beer', 'bread', 'milk']), set(['beer', 'bread', 'apple juice']), set(['milk'])]
-    >>> apriori(some_transactions, set(['beer', 'bread', 'milk', 'apple juice']), 0.5)
-    [set(['beer']), set(['bread']), set(['milk']), set(['beer', 'bread']), set(['beer', 'bread', 'milk'])]
-    >>> apriori(some_transactions, set(['beer', 'bread', 'milk', 'apple juice']), 0.9)
+    >>> simple_transactions = ['ABC', 'BC', 'BD', 'D']
+    >>> apriori(simple_transactions, 'ABCDE', 0.25)
+    ['A', 'B', 'C', 'D', 'AB', 'AC', 'AD', 'BC', 'BD', 'CD', 'ABC', 'ABD', 'ACD', 'BCD', 'ABCD']
+    >>> apriori(simple_transactions, 'ABCDE', 0.5)
+    ['B', 'C', 'D', 'BC', 'BD', 'CD', 'BCD']
+    >>> apriori(simple_transactions, 'ABCDE', 0.75)
+    ['B']
+    >>> apriori(simple_transactions, 'ABCDE', 0.9)
     []
     """
 
-    def _apriori_gen(frequent_sets):
-        """
-
-        :param frequent_sets: ORDERED list of frequent itemsets
-        """
-        new_candidates = []
-        for index, frequent_item in enumerate(frequent_sets):
-            #addition = 1
-            #if index + addition == len(frequent_sets) and frequent_item[:-1] == frequent_sets[index + addition][:-1]:
-            #    new_candidates.append(frequent_item + frequent_sets[index + addition][-1])
-            #    addition += 1
-            for next_item in frequent_sets[index + 1:]:
-                if frequent_item[:-1] == next_item[:-1]:
-                    new_candidates.append(frequent_item + next_item[-1])
-                else:
-                    break
-
-        return new_candidates
-
-    def _prune(candidate_itemsets):
-        new_itemset = []
-        for item in candidate_itemsets:
-            if support_count(item, transactions) >= N * minsup:
-                new_itemset.add(set(item))
-        return new_itemset
+    def _prune(candidate_itemsets, previous_frequent):
+        pruned_itemset = []
+        for candidate in candidate_itemsets:
+            for i in range(0, len(candidate)):
+                if all([(candidate[:i] + candidate[i+1:]) in previous_frequent]):
+                    pruned_itemset.append(candidate)
+        return sorted(list(set(pruned_itemset)))
 
     itemset = sorted(list(itemset))
 
     k = 1
     N = len(transactions)
 
-    frequent_itemsets = [set()]
+    frequent_itemsets = [[], sorted(
+        [item for item in itemset if support_count(set([item]), transactions) >= N * minsup])]
 
-    frequent_itemsets.append(sorted(
-        [item for item in itemset if support_count(set([item]), transactions) >= N * minsup]))
+    pruned_candidates = True
 
-    while frequent_itemsets[k]:
+    while pruned_candidates:
         k += 1
-        # candidate_sets = [i.union(j) for i in itemset for j in itemset if len(i.union(j)) == k]
         candidate_sets = _apriori_gen(frequent_itemsets[k-1])
-        frequent_itemsets.append(_prune(candidate_sets))
+        pruned_candidates = _prune(candidate_sets, frequent_itemsets[k-1])
+        frequent_itemsets.append(pruned_candidates)
 
-    #print list(itertools.chain(*frequent_itemsets))
     return list(itertools.chain(*frequent_itemsets))
 
 
