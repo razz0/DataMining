@@ -29,20 +29,15 @@ def _apriori_gen(frequent_sets):
 
     >>> _apriori_gen([('A',), ('B',), ('C',)])
     [('A', 'B'), ('A', 'C'), ('B', 'C')]
-
     >>> _apriori_gen([('A', 'B'), ('A', 'C'), ('B', 'C')])
     [('A', 'B', 'C')]
-
     >>> _apriori_gen([tuple(item) for item in ['ABC', 'ABD', 'ABE', 'ACD', 'BCD', 'BCE', 'CDE']])
     [('A', 'B', 'C', 'D'), ('A', 'B', 'C', 'E'), ('A', 'B', 'D', 'E'), ('B', 'C', 'D', 'E')]
-
-    >>> _apriori_gen([['57033', '58972'], ['57033', '57342']])
-    [('57033', '58972', '57342')]
-
     >>> cc = [('55015', '55314'), ('55015', '55315'), ('55314', '55315'), ('57016', '57017'), ('57043', '57047'), ('581325', '582103')]
     >>> _apriori_gen(cc)
     [('55015', '55314', '55315')]
     """
+
     new_candidates = []
     for index, frequent_item in enumerate(frequent_sets):
         for next_item in frequent_sets[index + 1:]:
@@ -68,8 +63,6 @@ def transaction_subsets(transaction, k):
     :return:
     """
     subsets = []
-
-    #print 'TRANSACTION: %s - K: %s' % (transaction, k)
 
     if k == 1:
         return [(t,) for t in transaction]
