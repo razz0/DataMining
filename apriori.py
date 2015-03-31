@@ -131,6 +131,8 @@ def apriori(transactions, all_items, minsup, fixed_k=None, verbose=False):
             candidates_subsets = transaction_subsets(t, k)
 
             for subset in candidates_subsets:
+                print len(subset)
+                print subset
                 support[subset] += 1
 
         pruned_candidates = [item for item in candidate_sets if support[item] >= N * minsup]
