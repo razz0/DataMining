@@ -121,17 +121,24 @@ def apriori(transactions, all_items, minsup, fixed_k=None, verbose=False):
         candidate_sets = _apriori_gen(frequent_itemsets[k])
         k += 1
         if verbose:
-            print 'k=%s - set count %s' % (k, len(candidate_sets))
+            print 'k=%s - set count %s - support list length %s' % (k, len(candidate_sets), len(support))
         if not candidate_sets:
             break
+
+        candidate_sets_as_set = set(candidate_sets)
 
         for tindex, t in enumerate(transactions):
             if verbose and k > 3 and tindex % (len(transactions) / 50) == 0:
                 print 'Transaction %s / %s' % (tindex, len(transactions))
-            candidates_subsets = transaction_subsets(t, k)
+            subsets = transaction_subsets(t, k)
 
-            for subset in candidates_subsets:
-                support[subset] += 1
+            for subset in subsets:
+                if set([subset]) <= candidate_sets_as_set:
+                    support[subset] += 1
+
+        # Free up some memory
+        for key in [removable for removable in support.iterkeys() if len(removable) < k]:
+            del support[key]
 
         pruned_candidates = [item for item in candidate_sets if support[item] >= N * minsup]
 

@@ -2,8 +2,8 @@ import apriori as a
 import students as s
 
 s.read_students()
-cc = [c[0] for c in s.all_courses]
-trans = [tuple([course['code'] for course in stud.courses]) for stud in s.students]
+cc = [c[1] for c in s.all_courses]
+trans = [tuple([course['name'] for course in stud.courses]) for stud in s.students]
 
 new_cc = [c[0] for c in a.apriori(trans, cc, 0.05, fixed_k=1)]
 new_trans = [[course for course in tr if course in new_cc] for tr in trans]
@@ -11,7 +11,7 @@ new_trans = [[course for course in tr if course in new_cc] for tr in trans]
 assert len(new_trans) == len(trans)
 assert len(new_trans[666]) < len(trans[666])
 
-assert len(new_cc) == 100
+assert len(new_cc) == 102
 assert len(new_trans[371]) == 16
 
 del cc
