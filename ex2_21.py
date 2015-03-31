@@ -19,4 +19,4 @@ del trans
 del s
 
 print 'This will take a while...'
-print (a.apriori(new_trans, new_cc, 0.05, verbose=True))
+print a.apriori(new_trans, new_cc, 0.05, verbose=True)[-1]
