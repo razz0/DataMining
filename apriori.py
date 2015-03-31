@@ -1,6 +1,6 @@
 """Implementation of The Apriori algorithm, F(k-1) x F(k-1) variant."""
-from collections import defaultdict
 
+from collections import defaultdict
 import itertools
 
 
@@ -18,8 +18,8 @@ def support_count(itemset, transactions):
     >>> support_count(set(['beer']), some_transactions)
     2
     """
-    # print set([itemset])
-    # print set(transactions[0])
+    #print set(itemset)
+    #print set(transactions[0])
     return len([row for row in transactions if set(itemset) <= set(row)])
 
 
@@ -27,24 +27,42 @@ def _apriori_gen(frequent_sets):
     """
     Generate candidate itemsets
 
-    :param frequent_sets: ORDERED list of k-1 frequent itemsets as tuples
+    :param frequent_sets: list of tuples, containing frequent itemsets [ORDERED]
 
-    >>> _apriori_gen(['A', 'B', 'C'])
+    >>> _apriori_gen([('A',), ('B',) ('C',)])
     [('A', 'B'), ('A', 'C'), ('B', 'C')]
-    >>> ''.join(_apriori_gen([('AB',), ('AC',), ('BC',)]))
-    ['ABC']
-    >>> [''.join(items for items in _apriori_gen(['ABC', 'ABD', 'ABE', 'ACD', 'BCD', 'BCE', 'CDE']))]
-    ['ABCD', 'ABCE', 'ABDE', 'BCDE']
+
+    >>> _apriori_gen([('A', 'B'), ('A', 'C'), ('B', 'C')])
+    [('A', 'B', 'C')]
+
+    >>> _apriori_gen([tuple(item) for item in ['ABC', 'ABD', 'ABE', 'ACD', 'BCD', 'BCE', 'CDE']])
+    [('A', 'B', 'C', 'D'), ('A', 'B', 'C', 'E'), ('A', 'B', 'D', 'E'), ('B', 'C', 'D', 'E')]
+
+    >>> _apriori_gen([['57033', '58972'], ['57033', '57342']])
+    [('57033', '58972', '57342')]
+
+    >>> cc = [('55015', '55314'), ('55015', '55315'), ('55314', '55315'), ('57016', '57017'), ('57043', '57047'), ('581325', '582103')]
+    >>> _apriori_gen(cc)
+    [('55015', '55314', '55315')]
     """
+    #print '----------------'
+    #print '_apriori_gen got %s' % frequent_sets
+    #print '----------------'
     new_candidates = []
     for index, frequent_item in enumerate(frequent_sets):
         for next_item in frequent_sets[index + 1:]:
+            #print '%s - %s' % (type(frequent_item), frequent_item)
+            #print '%s - %s' % (type(next_item), next_item)
             if len(frequent_item) == 1:
-                new_candidates.append(frequent_item + next_item)
+                new_candidates.append(tuple(frequent_item) + tuple(next_item))
             elif frequent_item[:-1] == next_item[:-1]:
-                new_candidates.append(tuple(list(frequent_item) + [next_item[-1]]))
+                new_candidates.append(tuple(frequent_item) + (next_item[-1],))
             else:
                 break
+
+    #print '----------------'
+    #print '_apriori_gen returning %s' % new_candidates
+    #print '----------------'
 
     return new_candidates
 
@@ -54,7 +72,7 @@ def transaction_subsets(transaction, k):
     Get subsets of transactions of length k
 
     >>> transaction_subsets(['A', 'B', 'C', 'D', 'E'], 4)
-    [['A', 'B', 'C', 'D'], ['A', 'B', 'C', 'E'], ['A', 'B', 'D', 'E'], ['A', 'C', 'D', 'E'], ['B', 'C', 'D', 'E']]
+    [('A', 'B', 'C', 'D'), ('A', 'B', 'C', 'E'), ('A', 'B', 'D', 'E'), ('A', 'C', 'D', 'E'), ('B', 'C', 'D', 'E')]
 
     :param transaction: list
     :param k: int
@@ -62,15 +80,17 @@ def transaction_subsets(transaction, k):
     """
     subsets = []
 
+    #print 'TRANSACTION: %s - K: %s' % (transaction, k)
+
     if k == 1:
-        return [[t] for t in transaction]
+        return [(t,) for t in transaction]
 
     elif k > len(transaction):
         return []
 
     for i in range(0, len(transaction) - (k - 1)):
         for t in transaction_subsets(transaction[i + 1:], k - 1):
-            subset = [transaction[i]] + t
+            subset = (transaction[i],) + t
             subsets.append(subset)
 
     return subsets
@@ -80,19 +100,17 @@ def apriori(transactions, all_items, minsup, fixed_k=None):
     """
     Apriori method
 
-    :param transactions: list of tuples (list of transactions containing items as tuples)
+    :param transactions: list of iterables (list of transactions containing items)
     :param all_items: list distinct items
     :param minsup: minimum support
 
-    >>> simple_transactions = [[tuple(piece) for piece in item] for item in ['ABC', 'BC', 'BD', 'D']]
-    >>> alphabet = [tuple(letter) for letter in 'ABCDE']
-    >>> res = apriori(simple_transactions, alphabet, 0.25)
-    >>> print [''.join(item) for item in res]
-    ['A', 'B', 'C', 'D', 'AB', 'AC', 'AD', 'BC', 'BD', 'CD', 'ABC', 'ABD', 'ACD', 'BCD', 'ABCD']
-    >>> res = apriori(simple_transactions, alphabet, 0.5)
-    >>> print [''.join(item) for item in res]
-    ['B', 'C', 'D', 'BC', 'BD', 'CD', 'BCD']
-    >>> res = apriori(simple_transactions, alphabet, 0.5, fixed_k=2)
+    >>> simple_transactions = [('007', '666', '777'), ('007', 'BC',), ('007', '666'), ('777',)]
+    >>> alphabet = ['007', '666', '777', 'BC']
+    >>> apriori(simple_transactions, alphabet, 0.3)
+    [('B',), ('C',), ('D',)]
+    >>> apriori(simple_transactions, alphabet, 0.6)
+    [('B',)]
+    >>> apriori(simple_transactions, alphabet, 0.5, fixed_k=2)
     >>> print [''.join(item) for item in res]
     ['BC', 'BD', 'CD']
     >>> res = apriori(simple_transactions, alphabet, 0.75)
@@ -123,41 +141,52 @@ def apriori(transactions, all_items, minsup, fixed_k=None):
 
     for item in all_items:
         new_item = (item,)
-        support[new_item] = support_count([item], transactions)
+        support[new_item] = support_count(new_item, transactions)
     #    if support[item]:
-            #print item
-            #print transactions[0]
-            #print support[item]
+        #print new_item
+        #print transactions[0]
+        #print support[item]
 
         if support[new_item] >= N * minsup:
             frequent_itemsets[1].append(new_item)
 
-    print frequent_itemsets
-
-    #if len(frequent_itemsets[1]):
-        # print 'K %s sets - %s' % (k, frequent_itemsets)
-        #assert len(frequent_itemsets[1][0]) == 1
-
     pruned_candidates = [True]
 
     while pruned_candidates and pruned_candidates[0] and (not fixed_k or k < fixed_k):
+        candidate_sets = _apriori_gen(frequent_itemsets[k])
         k += 1
-        candidate_sets = _apriori_gen(frequent_itemsets[k-1])
-        # print 'K %s sets - %s' % (k, candidate_sets)
-        # pruned_candidates = _prune(candidate_sets, frequent_itemsets[k-1])
+        print 'K %s sets - %s' % (k, candidate_sets)
+        #pruned_candidates = _prune(candidate_sets, frequent_itemsets[k-1])
+        if not candidate_sets:
+            break
+
         for t in transactions:
-            candidates_t = list(set(t) & set(candidate_sets))
-            candidates_subsets = transaction_subsets(candidates_t, k)
+            candidates_subsets = transaction_subsets(t, k)
+            #candidates_in_t = [candi for candi in candidates_subsets if set(candi) <= set(t)]
+            #print [set(candi) for candi in candidates_subsets]
+            #print '%s : %s vs %s' % (len(t), len(candidates_in_t), len(candidates_subsets))
+            #print candidates_subsets
+            #print t
+            #if len(candidates_in_t) != len(candidates_subsets):
+            #    print '######################'
+            #    print candidates_in_t
+            #    print candidates_subsets
+            #    print '######################'
+
+            # candidate_subsets _ARE_ always in t (why?!)
             for subset in candidates_subsets:
                 support[subset] += 1
 
         pruned_candidates = [item for item in candidate_sets if support[item] >= N * minsup]
 
-        print 'Pruned K %s-itemsets - length %s' % (k, len(pruned_candidates))
+        #print 'Pruned K %s-itemsets - length %s' % (k, len(pruned_candidates))
         frequent_itemsets.append(pruned_candidates)
 
     if fixed_k:
-        return frequent_itemsets[fixed_k]
+        try:
+            return frequent_itemsets[fixed_k]
+        except IndexError:
+            return []
 
     return list(itertools.chain(*frequent_itemsets))
 
