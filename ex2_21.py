@@ -5,15 +5,18 @@ s.read_students()
 cc = [c[0] for c in s.all_courses]
 trans = [tuple([course['code'] for course in stud.courses]) for stud in s.students]
 
-new_cc = a.apriori(trans, cc, 0.05, fixed_k=1)
+new_cc = [c[0] for c in a.apriori(trans, cc, 0.05, fixed_k=1)]
 new_trans = [[course for course in tr if course in new_cc] for tr in trans]
 
 assert len(new_trans) == len(trans)
 assert len(new_trans[666]) < len(trans[666])
+
+assert len(new_cc) == 100
+assert len(new_trans[371]) == 16
 
 del cc
 del trans
 del s
 
 print 'This will take a while...'
-print a.apriori(new_trans, new_cc, 0.05, verbose=True)[-1]
+print (a.apriori(new_trans, new_cc, 0.05, verbose=True))
