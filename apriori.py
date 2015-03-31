@@ -96,7 +96,7 @@ def transaction_subsets(transaction, k):
     return subsets
 
 
-def apriori(transactions, all_items, minsup, fixed_k=None):
+def apriori(transactions, all_items, minsup, fixed_k=None, verbose=False):
     """
     Apriori method
 
@@ -155,12 +155,15 @@ def apriori(transactions, all_items, minsup, fixed_k=None):
     while pruned_candidates and pruned_candidates[0] and (not fixed_k or k < fixed_k):
         candidate_sets = _apriori_gen(frequent_itemsets[k])
         k += 1
-        print 'K %s sets - %s' % (k, candidate_sets)
+        if verbose:
+            print 'k=%s - set count %s' % (k, len(candidate_sets))
         #pruned_candidates = _prune(candidate_sets, frequent_itemsets[k-1])
         if not candidate_sets:
             break
 
-        for t in transactions:
+        for tindex, t in enumerate(transactions):
+            if verbose and k > 3 and tindex % (len(transactions) / 50) == 0:
+                print 'Transaction %s / %s' % (tindex, len(transactions))
             candidates_subsets = transaction_subsets(t, k)
             #candidates_in_t = [candi for candi in candidates_subsets if set(candi) <= set(t)]
             #print [set(candi) for candi in candidates_subsets]
