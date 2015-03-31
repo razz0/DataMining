@@ -27,7 +27,7 @@ def _apriori_gen(frequent_sets):
 
     :param frequent_sets: list of tuples, containing frequent itemsets [ORDERED]
 
-    >>> _apriori_gen([('A',), ('B',) ('C',)])
+    >>> _apriori_gen([('A',), ('B',), ('C',)])
     [('A', 'B'), ('A', 'C'), ('B', 'C')]
 
     >>> _apriori_gen([('A', 'B'), ('A', 'C'), ('B', 'C')])
@@ -96,15 +96,13 @@ def apriori(transactions, all_items, minsup, fixed_k=None, verbose=False):
     >>> simple_transactions = [('007', '666', '777'), ('007', 'BC',), ('007', '666'), ('777',)]
     >>> alphabet = ['007', '666', '777', 'BC']
     >>> apriori(simple_transactions, alphabet, 0.3)
-    [('B',), ('C',), ('D',)]
+    [('007',), ('666',), ('777',), ('007', '666')]
     >>> apriori(simple_transactions, alphabet, 0.6)
-    [('B',)]
+    [('007',)]
     >>> apriori(simple_transactions, alphabet, 0.5, fixed_k=2)
-    >>> print [''.join(item) for item in res]
-    ['BC', 'BD', 'CD']
-    >>> res = apriori(simple_transactions, alphabet, 0.75)
-    >>> print [''.join(item) for item in res]
-    ['B']
+    [('007', '666')]
+    >>> apriori(simple_transactions, alphabet, 0.75)
+    [('007',)]
     >>> apriori(simple_transactions, alphabet, 0.9)
     []
     """
