@@ -30,8 +30,8 @@ Test Student class:
 Aprior:
 
 >>> import apriori as a
->>> cc = [[c[0]] for c in s.all_courses]
->>> trans = [[course['code'] for course in stud.courses] for stud in s.students]
+>>> cc = [(c[0],) for c in s.all_courses]
+>>> trans = [[(course['code'],) for course in stud.courses] for stud in s.students]
 
 
 '''
