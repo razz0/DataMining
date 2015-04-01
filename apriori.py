@@ -128,7 +128,7 @@ def apriori(transactions, all_items, minsup, fixed_k=None, verbose=False):
         candidate_sets_as_set = set(candidate_sets)
 
         for tindex, t in enumerate(transactions):
-            if verbose and k > 3 and tindex % (len(transactions) / 50) == 0:
+            if verbose and k > 3 and tindex % (len(transactions) / (100 * (k - 3))) == 0:
                 print 'Transaction %s / %s' % (tindex, len(transactions))
             subsets = transaction_subsets(t, k)
 
