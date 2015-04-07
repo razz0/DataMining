@@ -115,9 +115,9 @@ def apriori(transactions, all_items, minsup, fixed_k=None, verbose=False):
         if support[new_item] >= N * minsup:
             frequent_itemsets[1].append(new_item)
 
-    pruned_candidates = [True]
+    pruned_candidates = [True, 'dummy']
 
-    while pruned_candidates and pruned_candidates[0] and (not fixed_k or k < fixed_k):
+    while pruned_candidates and len(pruned_candidates) > 1 and (not fixed_k or k < fixed_k):
         candidate_sets = _apriori_gen(frequent_itemsets[k])
         k += 1
         if verbose:
