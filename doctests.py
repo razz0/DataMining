@@ -6,7 +6,7 @@ Doctests for students.py.
 >>> print len(s.filter_students_by_courses(s.students, s.OHJ_PER))
 574
 >>> print len(s.filter_students_by_courses(s.students, s.OHJ_JAT2, grades=s.PASSED_GRADES))
-500
+457
 >>> print len(s.filter_students_by_courses(s.students, s.OHJ_PER | s.OHJ_JAT2))
 467
 >>> print "%.3f - %.3f" % s.rule_implication(s.OHJ_PER, s.OHJ_JAT2)
@@ -26,6 +26,9 @@ Test Student class:
 1
 >>> len(a.get_course_by_name('Test course', grades=['5']))
 1
+>>> a.create_course_sequence()
+>>> print a.course_sequence
+[('Test course',)]
 
 Apriori:
 

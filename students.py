@@ -55,6 +55,8 @@ def read_students():
             student.add_course(*course)
             all_courses.add((course[1], course[2]))
 
+        student.create_course_sequence()
+
 
 class Student(object):
     '''Single student course history'''
@@ -62,6 +64,7 @@ class Student(object):
     def __init__(self, reg_time):
         self.registration_year = reg_time
         self.courses = []
+        self.course_sequence = []
 
     def add_course(self, time, code, name, credits, grade):
         self.courses.append(dict(time=time, code=code, name=name, credits=credits, grade=grade))
@@ -86,6 +89,16 @@ class Student(object):
 
         return self.filter_courses(correct_names, grades=grades, timespan=timespan)
 
+    def create_course_sequence(self):
+        """Create a sequence (list) of students courses"""
+        course_dict = {}
+        for c in self.courses:
+            if c['time'] in course_dict:
+                course_dict[c['time']] += [c['name']]
+            else:
+                course_dict[c['time']] = [c['name']]
+
+        self.course_sequence = [tuple(course_dict[key]) for key in sorted(course_dict)]
 
 def count_course_attempts(course_name, grades=()):
     '''
