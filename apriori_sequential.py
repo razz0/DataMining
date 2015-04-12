@@ -48,19 +48,41 @@ def support_count(sequence, seq_list):
 
 def _sequential_candidate_generation(sequences, k):
     """
-    Generate candidate sequences
+    Generate candidate sequences of length k.
 
     :param sequences: list of sequences containing elements containing events
     :param k: > 1
 
-    >>> _sequential_candidate_generation([(('A',),), (('B',),), (('C',),)], 2)
-    [(('A',), ('B',)), (('A', 'B'),), (('A',), ('C',)), (('A', 'C'),), (('B',), ('A',)), (('B',), ('C',)), (('B', 'C'),), (('C',), ('A',)), (('C',), ('B',))]
+    >>> pprint(_sequential_candidate_generation([(('A',),), (('B',),), (('C',),)], 2))
+    [(('A',), ('A',)),
+     (('A',), ('B',)),
+     (('A', 'B'),),
+     (('A',), ('C',)),
+     (('A', 'C'),),
+     (('B',), ('A',)),
+     (('B',), ('B',)),
+     (('B',), ('C',)),
+     (('B', 'C'),),
+     (('C',), ('A',)),
+     (('C',), ('B',)),
+     (('C',), ('C',))]
     >>> _sequential_candidate_generation([(('A', 'B'),), (('A', 'C'),), (('B',), ('C',))], 3)
     [(('A', 'B'), ('C',))]
     >>> _sequential_candidate_generation([(('A',), ('B',)), (('A', 'C'),), (('B', 'C'),), (('C', 'C'),)], 3)
     [(('A',), ('B', 'C')), (('A', 'C', 'C'),), (('B', 'C', 'C'),)]
-    >>> _sequential_candidate_generation([((1,),), ((2,),), ((3,),)], 2)
-    [((1,), (1,)), ((1,), (2,)), ((1, 2),), ((1,), (3,)), ((1, 3),), ((2,), (1,)), ((2,), (2,)), ((2,), (3,)), ((2, 3),), ((3,), (1,)), ((3,), (2,)), ((3,), (3,))]
+    >>> pprint(_sequential_candidate_generation([((1,),), ((2,),), ((3,),)], 2))
+    [((1,), (1,)),
+     ((1,), (2,)),
+     ((1, 2),),
+     ((1,), (3,)),
+     ((1, 3),),
+     ((2,), (1,)),
+     ((2,), (2,)),
+     ((2,), (3,)),
+     ((2, 3),),
+     ((3,), (1,)),
+     ((3,), (2,)),
+     ((3,), (3,))]
     >>> _sequential_candidate_generation([((1,), (2,)), ((2,), (3,))], 3)
     [((1,), (2,), (3,))]
     """
@@ -131,7 +153,16 @@ def apriori_sequential(sequences, minsup, fixed_k=None, verbose=False):
                 ((1, 2), (2, 3, 4), (2, 4, 5)), \
                 ((2,), (3, 4), (4, 5)), \
                 ((1, 3), (2, 4, 5))]
-    >>> apriori_sequential(seqs, 0.5)
+    >>> pprint(apriori_sequential(seqs, 0.8))
+    [((1,),),
+     ((2,),),
+     ((3,),),
+     ((4,),),
+     ((5,),),
+     ((1,), (2,)),
+     ((2,), (3,)),
+     ((2, 4),),
+     ((3,), (5,))]
     """
 
     k = 1
