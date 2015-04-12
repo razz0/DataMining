@@ -6,7 +6,6 @@ Model sequences like ((1, 2, 3), (4, 5), (4, 6)).
 from collections import defaultdict
 from pprint import pprint
 import copy
-import itertools
 
 
 def flatten(sequence):
@@ -163,6 +162,9 @@ def apriori_sequential(sequences, minsup, fixed_k=None, verbose=False):
      ((2,), (3,)),
      ((2, 4),),
      ((3,), (5,))]
+    >>> seqs = [((1,), (), (), (2,), (), (), (3,)), \
+                ((1, 2,), (), (2,3 ), (2,), (), (3,), ()), \
+                ((1,), (2,), (), (2,), (3,), (3,), (2, 3, 4))]
     """
 
     k = 1
@@ -172,25 +174,24 @@ def apriori_sequential(sequences, minsup, fixed_k=None, verbose=False):
     support = defaultdict(int)
 
     if verbose:
-        print 'Initializing length 1 sequences...'
+        print 'Initializing length 1 frequent sequences...'
 
     for seq in sequences:
         events = sorted(set(flatten(seq)))
         for event in events:
             event_seq = ((event,),)
-            support[event_seq] = support_count(event_seq, sequences)
+            if event_seq not in support:
+                support[event_seq] = support_count(event_seq, sequences)
 
-            #print "k==1, event seq: %s - support: %s" % (event_seq, support[event_seq])
+                #print "k==1, event seq: %s - support: %s" % (event_seq, support[event_seq])
 
-            if support[event_seq] >= N * minsup and event_seq not in frequent_sequences[1]:
-                frequent_sequences[1].append(event_seq)
-
-    pruned_candidates = ['dummy', 'dummy']
-
-    #print frequent_sequences
+                if support[event_seq] >= N * minsup and event_seq not in frequent_sequences[1]:
+                    frequent_sequences[1].append(event_seq)
 
     if verbose:
-        print 'Calculating longer sequences...'
+        print 'Generating longer frequent sequences...'
+
+    pruned_candidates = ['dummy', 'dummy']
 
     while pruned_candidates and len(pruned_candidates) > 1 and (not fixed_k or k < fixed_k):
         k += 1
@@ -216,25 +217,19 @@ def apriori_sequential(sequences, minsup, fixed_k=None, verbose=False):
                 if is_subsequence(pruned_seq, seq):
                     support[pruned_seq] += 1
 
-        # Free up some memory
-        #for key in [removable for removable in support.iterkeys() if len(removable) < k]:
-        #    del support[key]
-
-        #pruned_candidates = [seq for seq in candidate_seqs if support[seq] >= N * minsup]
-
-        #frequent_sequences.append(pruned_candidates)
-
         frequent_sequences.append([seq for seq in pruned_candidates if support[seq] >= N * minsup])
-
-        #print frequent_sequences[k]
 
     if fixed_k:
         try:
-            return frequent_sequences[fixed_k]
+            freq_items = [dict([('sequence', freqseq), ('support_count', support[freqseq] / float(N))] for freqseq in frequent_sequences[fixed_k])]
+            #return [(freqseq, support[freqseq]) for freqseq in frequent_sequences[fixed_k]]
         except IndexError:
             return []
+    else:
+        freq_items = [{'sequence': freqseq, 'support_count': support[freqseq] / float(N)} for freq_k in frequent_sequences for freqseq in freq_k]
 
-    return list(itertools.chain(*frequent_sequences))
+    #return list(itertools.chain(*freq_items))
+    return freq_items
 
 
 if __name__ == "__main__":
