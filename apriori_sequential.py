@@ -1,6 +1,9 @@
 """Implementation of the Apriori algorithm for sequential patterns, F(k-1) x F(k-1) variant.
 
 Model sequences like ((1, 2, 3), (4, 5), (4, 6)).
+
+To get course sequences with empty elements as (0,):
+course_seqs = [tuple([seq or (0,) for seq in x.course_sequence]) for x in s.students]
 """
 
 from collections import defaultdict
@@ -153,15 +156,15 @@ def apriori_sequential(sequences, minsup, fixed_k=None, verbose=False):
                 ((2,), (3, 4), (4, 5)), \
                 ((1, 3), (2, 4, 5))]
     >>> pprint(apriori_sequential(seqs, 0.8))
-    [((1,),),
-     ((2,),),
-     ((3,),),
-     ((4,),),
-     ((5,),),
-     ((1,), (2,)),
-     ((2,), (3,)),
-     ((2, 4),),
-     ((3,), (5,))]
+    [{((1,),): 0.80000000000000004},
+     {((2,),): 1.0},
+     {((3,),): 1.0},
+     {((4,),): 1.0},
+     {((5,),): 0.80000000000000004},
+     {((1,), (2,)): 0.80000000000000004},
+     {((2,), (3,)): 0.80000000000000004},
+     {((2, 4),): 0.80000000000000004},
+     {((3,), (5,)): 0.80000000000000004}]
     >>> seqs = [((1,), (), (), (2,), (), (), (3,)), \
                 ((1, 2,), (), (2,3 ), (2,), (), (3,), ()), \
                 ((1,), (2,), (), (2,), (3,), (3,), (2, 3, 4))]
@@ -208,11 +211,11 @@ def apriori_sequential(sequences, minsup, fixed_k=None, verbose=False):
             if all([subseq in frequent_sequences[k - 1] for subseq in subseqs]):
                 pruned_candidates.append(can_seq)
 
-        for pruned_seq in pruned_candidates:
-            for seq_index, seq in enumerate(sequences):
+        for pruned_index, pruned_seq in enumerate(pruned_candidates):
+            for seq in sequences:
                 if verbose and k > 3 and len(pruned_candidates) > 50 \
-                        and seq_index % (1 + len(sequences) / (100 * (k - 3))) == 0:
-                    print 'Sequence %s / %s' % (seq_index, len(sequences))
+                        and pruned_index % (1 + len(sequences) / (100 * (k - 3))) == 0:
+                    print 'Sequence %s / %s' % (pruned_index, len(sequences))
 
                 if is_subsequence(pruned_seq, seq):
                     support[pruned_seq] += 1
@@ -221,14 +224,12 @@ def apriori_sequential(sequences, minsup, fixed_k=None, verbose=False):
 
     if fixed_k:
         try:
-            freq_items = [dict([('sequence', freqseq), ('support_count', support[freqseq] / float(N))] for freqseq in frequent_sequences[fixed_k])]
-            #return [(freqseq, support[freqseq]) for freqseq in frequent_sequences[fixed_k]]
+            freq_items = [{freqseq: support[freqseq] / float(N)} for freqseq in frequent_sequences[fixed_k]]
         except IndexError:
             return []
     else:
-        freq_items = [{'sequence': freqseq, 'support_count': support[freqseq] / float(N)} for freq_k in frequent_sequences for freqseq in freq_k]
+        freq_items = [{freqseq: support[freqseq] / float(N)} for freq_k in frequent_sequences for freqseq in freq_k]
 
-    #return list(itertools.chain(*freq_items))
     return freq_items
 
 
