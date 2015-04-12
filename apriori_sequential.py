@@ -1,25 +1,48 @@
-"""Implementation of the Apriori algorithm for sequential patterns, F(k-1) x F(k-1) variant."""
+"""Implementation of the Apriori algorithm for sequential patterns, F(k-1) x F(k-1) variant.
+
+Model sequences like ((1, 2, 3), (4, 5), (4, 6)).
+"""
 
 from collections import defaultdict
 import copy
 import itertools
 
 
-def support_count(itemset, transactions):
+def flatten(sequence):
+    """Flatten events in sequence elements to list of events"""
+    return [event for element in sequence for event in element]
+
+
+def subsequence(seq1, seq2):
+    """Check if seq1 is a subsequence of seq2
+
+    >>> subsequence(((2,), (3, 5)), ((2, 4), (3, 5, 6), (8,)))
+    True
+    >>> subsequence(((1,), (2,)), ((1, 2), (3, 4)))
+    False
+    >>> subsequence(((2,), (4,)), ((2, 4), (2, 4), (2, 5)))
+    True
     """
-    Count support count for itemset
+    seq = copy.deepcopy(seq1)
+    for element in seq2:
+        if seq and set(seq[0]) <= set(element):
+            seq = seq[1:]
+
+    return True if not seq else False
+
+
+def support_count(sequence, seq_list):
+    """
+    Count support count for sequence
 
     :param itemset: items to measure support count for
     :param transactions: list of sets (all transactions)
 
-    >>> simple_transactions = ['ABC', 'BC', 'BD', 'D']
-    >>> [support_count(item, simple_transactions) for item in 'ABCDE']
-    [1, 3, 2, 2, 0]
-    >>> some_transactions = [set(['beer', 'bread', 'milk']), set(['beer']), set(['milk'])]
-    >>> support_count(set(['beer']), some_transactions)
-    2
+    >>> simple_seqs = [((1,), (2, 3)), ((2,), (3,)), ((2, 4,),), ((4,),)]
+    >>> [support_count(((item,),), simple_seqs) for item in range(1, 5)]
+    [1, 3, 2, 2]
     """
-    return len([row for row in transactions if set(itemset) <= set(row)])
+    return len([seq for seq in seq_list if subsequence(sequence, seq)])
 
 
 def _sequential_candidate_generation(sequences, k):
@@ -37,17 +60,13 @@ def _sequential_candidate_generation(sequences, k):
     [(('A',), ('B', 'C')), (('A', 'C', 'C'),), (('B', 'C', 'C'),)]
     """
 
-    def _flatten(sequence):
-        """Flatten events in sequence elements to list of events"""
-        return [event for element in sequence for event in element]
-
     new_candidates = []
     for index1, seq1 in enumerate(sequences):
         for index2, seq2 in enumerate(sequences):
             if index1 == index2:
                 continue
-            seq1_flattened = _flatten(seq1)
-            seq2_flattened = _flatten(seq2)
+            seq1_flattened = flatten(seq1)
+            seq2_flattened = flatten(seq2)
             if k == 2:
                 # Assume we get 1-sequences like we should
                 new_candidates.append((seq1[0], seq2[0],))
@@ -92,7 +111,7 @@ def transaction_subsets(transaction, k):
     return subsets
 
 
-def apriori_sequential(sequences, all_items, minsup, fixed_k=None, verbose=False):
+def apriori_sequential(sequences, sequence_list, minsup, fixed_k=None, verbose=False):
     """
     Apriori method for sequential patterns
 
@@ -100,8 +119,8 @@ def apriori_sequential(sequences, all_items, minsup, fixed_k=None, verbose=False
     :param all_items: list distinct items
     :param minsup: minimum support
 
-    >>> simple_sequences = [[('007', '666', '777'), ('007', 'BC',), ('007', '666'), ('777',)], \
-                            [(), ('007'), ('666'), ('BC',)]]
+    >>> simple_sequences = [(('007', '666', '777'), ('007', 'BC',), ('007', '666'), ('777',)), \
+                            ((), ('007',), ('666',), ('BC',))]
     >>> alphabet = ['007', '666', '777', 'BC']
     >>> apriori_sequential(simple_sequences, alphabet, 0.3)
     [('007',), ('666',), ('777',), ('007', '666')]
@@ -115,25 +134,25 @@ def apriori_sequential(sequences, all_items, minsup, fixed_k=None, verbose=False
     []
     """
 
-    all_items = sorted(list(all_items))
+    sequence_list = sorted(list(sequence_list))
 
     k = 1
     N = len(sequences)
 
-    frequent_itemsets = [[], []]  # k index, zero always empty
+    frequent_sequences = [[], []]  # k index, zero always empty
     support = defaultdict(int)
 
-    for item in all_items:
-        new_item = (item,)
-        support[new_item] = support_count(new_item, sequences)
+    for seq in sequence_list:
+        new_seq = (seq,)
+        support[new_seq] = support_count(new_seq, sequences)
 
-        if support[new_item] >= N * minsup:
-            frequent_itemsets[1].append(new_item)
+        if support[new_seq] >= N * minsup:
+            frequent_sequences[1].append(new_seq)
 
     pruned_candidates = [True, 'dummy']
 
     while pruned_candidates and len(pruned_candidates) > 1 and (not fixed_k or k < fixed_k):
-        candidate_sets = _sequential_candidate_generation(frequent_itemsets[k], k)
+        candidate_sets = _sequential_candidate_generation(frequent_sequences[k], k)
         k += 1
         if verbose:
             print 'k=%s - set count %s - support list length %s' % (k, len(candidate_sets), len(support))
@@ -155,17 +174,17 @@ def apriori_sequential(sequences, all_items, minsup, fixed_k=None, verbose=False
         for key in [removable for removable in support.iterkeys() if len(removable) < k]:
             del support[key]
 
-        pruned_candidates = [item for item in candidate_sets if support[item] >= N * minsup]
+        pruned_candidates = [seq for seq in candidate_sets if support[seq] >= N * minsup]
 
-        frequent_itemsets.append(pruned_candidates)
+        frequent_sequences.append(pruned_candidates)
 
     if fixed_k:
         try:
-            return frequent_itemsets[fixed_k]
+            return frequent_sequences[fixed_k]
         except IndexError:
             return []
 
-    return list(itertools.chain(*frequent_itemsets))
+    return list(itertools.chain(*frequent_sequences))
 
 
 if __name__ == "__main__":
