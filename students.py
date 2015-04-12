@@ -9,6 +9,7 @@ PASSED_GRADES = ALL_GRADES - FAILED_GRADES
 
 all_courses = set()
 students = []
+timestamps = set()
 
 OHJ_PER = set(['Ohjelmoinnin perusteet'])
 OHJ_JAT = set(['Ohjelmoinnin jatkokurssi'])
@@ -54,8 +55,10 @@ def read_students():
         for course in courses:
             student.add_course(*course)
             all_courses.add((course[1], course[2]))
+            timestamps.add(course[0])
 
         student.create_course_sequence()
+
 
 
 class Student(object):
@@ -97,6 +100,10 @@ class Student(object):
                 course_dict[c['time']] += [c['name']]
             else:
                 course_dict[c['time']] = [c['name']]
+
+        for time in timestamps:
+            if time not in course_dict:
+                course_dict[time] = []
 
         self.course_sequence = [tuple(course_dict[key]) for key in sorted(course_dict)]
 
