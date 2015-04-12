@@ -171,6 +171,9 @@ def apriori_sequential(sequences, minsup, fixed_k=None, verbose=False):
     frequent_sequences = [[], []]  # k index, zero always empty
     support = defaultdict(int)
 
+    if verbose:
+        print 'Initializing length 1 sequences...'
+
     for seq in sequences:
         events = sorted(set(flatten(seq)))
         for event in events:
@@ -185,6 +188,9 @@ def apriori_sequential(sequences, minsup, fixed_k=None, verbose=False):
     pruned_candidates = ['dummy', 'dummy']
 
     #print frequent_sequences
+
+    if verbose:
+        print 'Calculating longer sequences...'
 
     while pruned_candidates and len(pruned_candidates) > 1 and (not fixed_k or k < fixed_k):
         k += 1
