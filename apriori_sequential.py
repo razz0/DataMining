@@ -214,8 +214,8 @@ def apriori_sequential(sequences, minsup, fixed_k=None, verbose=False):
 
         for pruned_index, pruned_seq in enumerate(pruned_candidates):
             if verbose and k > 3 and len(pruned_candidates) > 50 \
-                    and pruned_index % (1 + len(sequences) / (100 * (k - 3))) == 0:
-                print 'Sequence %s / %s' % (pruned_index, len(sequences))
+                    and pruned_index % (1 + len(pruned_candidates) / (100 * (k - 3))) == 0:
+                print 'Candidate %s / %s' % (pruned_index, len(pruned_candidates))
             for seq in sequences:
                 if is_subsequence(pruned_seq, seq):
                     support[pruned_seq] += 1

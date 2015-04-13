@@ -23,6 +23,13 @@ def read_students():
     lines = f.readlines()
     f.close()
 
+    global all_courses
+    all_courses = set()
+    global students
+    students = []
+    global timestamps
+    timestamps = set()
+
     def _parse_student_row(row):
         '''Parse a row'''
 
