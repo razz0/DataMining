@@ -67,11 +67,11 @@ def generate_transaction_subsets(transaction, k):
     if k == 1:
         return [(t,) for t in transaction]
 
-    elif k > len(transaction):
-        return []
+#    elif k > len(transaction):
+#        return []
 
-    elif k == len(transaction):
-        return [tuple(transaction)]
+#    elif k == len(transaction):
+#        return [tuple(transaction)]
 
     elif k == len(transaction) - 1:
         for i in reversed(range(0, len(transaction))):
@@ -79,10 +79,11 @@ def generate_transaction_subsets(transaction, k):
             subsets.append(subset)
 
     else:
-        for i in range(0, len(transaction) - (k - 1)):
-            for t in generate_transaction_subsets(transaction[i + 1:], k - 1):
-                subset = (transaction[i],) + t
-                subsets.append(subset)
+        raise Exception('Trying to generate length %s subset of %s' % (k, transaction))
+#        for i in range(0, len(transaction) - (k - 1)):
+#            for t in generate_transaction_subsets(transaction[i + 1:], k - 1):
+#                subset = (transaction[i],) + t
+#                subsets.append(subset)
 
     return subsets
 
@@ -140,23 +141,31 @@ def apriori(transactions, all_items, minsup, fixed_k=None, verbose=False):
         # TODO: Optimize by looping through candidates instead of all transactions.
         # TODO: Check if any of the immediate subsets is infrequent and prune if so.
 
-        for tindex, t in enumerate(transactions):
-            if verbose and k > 3 and tindex % (len(transactions) / (100 * (k - 3))) == 0:
-                print 'Transaction %s / %s' % (tindex, len(transactions))
-            subsets = generate_transaction_subsets(t, k)
+        # TODO 2: Must loop through all transactions still to get the supports right...
 
-            for subset in subsets:
-                if subset not in frequent_itemsets[len(subset)]:
-                    break
-                if subset in candidate_sets:
-                #if set([subset]) <= candidate_sets_as_set:
-                    support[subset] += 1
+        pruned_candidates = candidate_sets
+
+        for t in transactions:
+            for candset in candidate_sets:
+                subsets = generate_transaction_subsets(candset, k - 1)
+                for subset in subsets:
+                    if subset not in frequent_itemsets[len(subset)]:
+                        # This candidate is not frequent
+                        pruned_candidates.remove(candset)
+                        break
+                    #if set([subset]) <= candidate_sets_as_set:
+                else:
+                    if all(candidate in t for candidate in candset):
+                        support[candset] += 1
+
 
         # Free up some memory
-        for key in [removable for removable in support.iterkeys() if len(removable) < k]:
-            del support[key]
+        #for key in [removable for removable in support.iterkeys() if len(removable) < k]:
+        #    del support[key]
 
-        pruned_candidates = [item for item in candidate_sets if support[item] >= N * minsup]
+        #print support
+
+        pruned_candidates = [item for item in pruned_candidates if support[item] >= N * minsup]
 
         frequent_itemsets.append(pruned_candidates)
 
