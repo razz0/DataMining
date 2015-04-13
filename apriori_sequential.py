@@ -3,7 +3,8 @@
 Model sequences like ((1, 2, 3), (4, 5), (4, 6)).
 
 To get course sequences with empty elements as (0,):
-course_seqs = [tuple([seq or (0,) for seq in x.course_sequence]) for x in s.students]
+course_seqs = [x.course_sequence for x in s.students]
+course_seqs2 = [tuple([seq or (0,) for seq in x.course_sequence]) for x in s.students]
 """
 
 from collections import defaultdict
@@ -212,11 +213,10 @@ def apriori_sequential(sequences, minsup, fixed_k=None, verbose=False):
                 pruned_candidates.append(can_seq)
 
         for pruned_index, pruned_seq in enumerate(pruned_candidates):
+            if verbose and k > 3 and len(pruned_candidates) > 50 \
+                    and pruned_index % (1 + len(sequences) / (100 * (k - 3))) == 0:
+                print 'Sequence %s / %s' % (pruned_index, len(sequences))
             for seq in sequences:
-                if verbose and k > 3 and len(pruned_candidates) > 50 \
-                        and pruned_index % (1 + len(sequences) / (100 * (k - 3))) == 0:
-                    print 'Sequence %s / %s' % (pruned_index, len(sequences))
-
                 if is_subsequence(pruned_seq, seq):
                     support[pruned_seq] += 1
 
