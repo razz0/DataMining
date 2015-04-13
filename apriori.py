@@ -138,14 +138,10 @@ def apriori(transactions, all_items, minsup, fixed_k=None, verbose=False):
 
         #candidate_sets_as_set = set(candidate_sets)
 
-        # TODO: Optimize by looping through candidates instead of all transactions.
-        # TODO: Check if any of the immediate subsets is infrequent and prune if so.
-
-        # TODO 2: Must loop through all transactions still to get the supports right...
-
         pruned_candidates = candidate_sets
 
         for t in transactions:
+            candidate_sets = pruned_candidates  # Remove the already pruned ones
             for candset in candidate_sets:
                 subsets = generate_transaction_subsets(candset, k - 1)
                 for subset in subsets:
