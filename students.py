@@ -1,6 +1,7 @@
 '''A module for handling Data Mining 2015 course data set.'''
 
 import re
+import apriori
 
 ALL_GRADES = set(['0', '1', '2', '3', '4', '5'])
 FAILED_GRADES = set(['0'])
@@ -161,3 +162,27 @@ def rule_implication(a, b):
     return support(a | b), support_count(a | b) / float(support_count(a))
 
 
+def get_course_transactions():
+    return [tuple([course['name'] for course in stud.courses]) for stud in students]
+
+
+def get_closed_frequent_itemsets(minsup):
+    """
+    Get closed frequent itemsets from the course dataset
+
+    :param minsup:
+    :return:
+    """
+
+    courses = [name for (code, name) in all_courses]
+    frequent = apriori.apriori(get_course_transactions(), courses, minsup)
+
+    # TODO: Implement
+    
+    pruned = frequent
+    for itemset in frequent:
+        for itemset in frequent:
+            #if itemset in apriori.
+            pass
+
+    return frequent

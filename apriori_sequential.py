@@ -207,6 +207,8 @@ def apriori_sequential(sequences, minsup, fixed_k=None, verbose=False):
 
         pruned_candidates = []
 
+        # TODO: Prune duplicates!
+
         for can_seq in candidate_seqs:
             subseqs = get_subsequences(can_seq)
             if all([subseq in frequent_sequences[k - 1] for subseq in subseqs]):
