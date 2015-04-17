@@ -91,19 +91,18 @@ print 'Good students n: %s, courses: %.3f' % \
 print 'Bad students n: %s, courses: %.3f' % \
       (len(bad_studs), sum([len(stud.pre_grad_courses) for stud in bad_studs]) / float(len(bad_studs)))
 
-freq_seqs = a.apriori_sequential([stud.course_sequence for stud in good_studs], minsup=0.8, verbose=1)
-freq_seqs_bad = a.apriori_sequential([stud.course_sequence for stud in bad_studs], minsup=0.8, verbose=1)
+freq_seqs = a.apriori_sequential([stud.course_sequence for stud in good_studs], minsup=0.5, verbose=1)
+#freq_seqs_bad = a.apriori_sequential([stud.course_sequence for stud in bad_studs], minsup=0.5, verbose=1)
 
 biased_seqs = {}
 
 for seq_dict in freq_seqs:
-    if (0,) not in seq_dict.items()[0][0] and seq_dict not in freq_seqs_bad:
-        seq = seq_dict.items()[0][0]
-        assert len(seq_dict.items()) == 1
-        if len(seq) > 5:
-            avgs = [stud.average for stud in graduated if a.is_subsequence(seq, stud.course_sequence)]
-            avgs = sum(avgs) / float(len(avgs))
-            biased_seqs[seq] = seq_dict.items()[0][1] * (avgs * avgs)
+    seq = seq_dict.items()[0][0]
+    assert len(seq_dict.items()) == 1
+    if len(seq) > 5:
+        avgs = [stud.average for stud in graduated if a.is_subsequence(seq, stud.course_sequence)]
+        avgs = sum(avgs) / float(len(avgs))
+        biased_seqs[seq] = seq_dict.items()[0][1] * avgs
 
 #print freq_seqs[-1]
 for seq in sorted(biased_seqs.items(), key=operator.itemgetter(1))[-10:]:

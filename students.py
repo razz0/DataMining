@@ -110,9 +110,9 @@ class Student(object):
             else:
                 course_dict[c['time']] = [c['name']]
 
-        for time in timestamps:
-            if time not in course_dict:
-                course_dict[time] = [(0,)]  # TODO: This is temporary and breaks things
+        #for time in timestamps:
+        #    if time not in course_dict:
+        #        course_dict[time] = [(0,)]
 
         self.course_sequence = [tuple(course_dict[key]) for key in sorted(course_dict)]
 
