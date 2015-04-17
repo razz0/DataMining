@@ -76,6 +76,7 @@ class Student(object):
         self.registration_year = reg_time
         self.courses = []
         self.course_sequence = []
+        self.course_sequence_timestamps = []  # TODO: implement usage
 
     def add_course(self, time, code, name, credits, grade):
         self.courses.append(dict(time=time, code=code, name=name, credits=credits, grade=grade))
@@ -109,9 +110,9 @@ class Student(object):
             else:
                 course_dict[c['time']] = [c['name']]
 
-        for time in timestamps:
-            if time not in course_dict:
-                course_dict[time] = []
+        #for time in timestamps:
+        #    if time not in course_dict:
+        #        course_dict[time] = []
 
         self.course_sequence = [tuple(course_dict[key]) for key in sorted(course_dict)]
 
@@ -178,7 +179,7 @@ def get_closed_frequent_itemsets(minsup):
     frequent = apriori.apriori(get_course_transactions(), courses, minsup)
 
     # TODO: Implement
-    
+
     pruned = frequent
     for itemset in frequent:
         for itemset in frequent:

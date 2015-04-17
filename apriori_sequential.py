@@ -193,6 +193,7 @@ def apriori_sequential(sequences, minsup, fixed_k=None, verbose=False):
                     frequent_sequences[1].append(event_seq)
 
     if verbose:
+        print 'Initialized %s 1-sequences' % len(frequent_sequences[1])
         print 'Generating longer frequent sequences...'
 
     pruned_candidates = ['dummy', 'dummy']
@@ -201,22 +202,20 @@ def apriori_sequential(sequences, minsup, fixed_k=None, verbose=False):
         k += 1
         candidate_seqs = _sequential_candidate_generation(frequent_sequences[k - 1], k)
         if verbose:
-            print 'k=%s - seq count %s - support list length %s' % (k, len(candidate_seqs), len(support))
+            print 'k=%s - candidate sequence count %s' % (k, len(candidate_seqs),)
         if not candidate_seqs:
             break
 
         pruned_candidates = []
 
-        # TODO: Prune duplicates!
-
         for can_seq in candidate_seqs:
             subseqs = get_subsequences(can_seq)
-            if all([subseq in frequent_sequences[k - 1] for subseq in subseqs]):
+            if all([subseq in frequent_sequences[k - 1] for subseq in subseqs]) and can_seq not in pruned_candidates:
                 pruned_candidates.append(can_seq)
 
         for pruned_index, pruned_seq in enumerate(pruned_candidates):
             if verbose and k > 3 and len(pruned_candidates) > 50 \
-                    and pruned_index % (1 + len(pruned_candidates) / (100 * (k - 3))) == 0:
+                    and pruned_index % (1 + len(pruned_candidates) / 5) == 0:
                 print 'Candidate %s / %s' % (pruned_index, len(pruned_candidates))
             for seq in sequences:
                 if is_subsequence(pruned_seq, seq):
