@@ -179,9 +179,8 @@ def get_closed_frequent_itemsets(minsup, verbose=True):
     """
 
     read_students()
-    courses = get_all_course_names()
     transactions = get_course_transactions()
-    frequent = apriori.apriori(transactions, courses, minsup, verbose=verbose)
+    frequent = apriori.apriori(transactions, get_all_course_names(), minsup, verbose=verbose)
 
     pruned = []
 
