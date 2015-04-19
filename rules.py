@@ -1,4 +1,5 @@
 # coding=utf-8
+import math
 
 import apriori as a
 import students as s
@@ -33,13 +34,19 @@ class RuleGenerator(object):
         return a.support_count(list(set(antecedent) | set(consequent)), self.transactions) / float(ant_sup)
 
     def lift(self, antecedent, consequent):
-        print a.support_count(antecedent, self.transactions)
         sup = a.support_count(antecedent, self.transactions) * a.support_count(consequent, self.transactions)
         if sup == 0:
             return 0
 
         # return self.confidence(antecedent, consequent) / float(sup)
         return self.N * a.support_count(list(set(antecedent) | set(consequent)), self.transactions) / float(sup)
+
+    def IS_measure(self, antecedent, consequent):
+        denominator = math.sqrt(a.support(antecedent, self.transactions) * a.support(consequent, self.transactions))
+        if denominator == 0:
+            return 0
+
+        return a.support(list(set(antecedent) | set(consequent)), self.transactions) / denominator
 
     def rule_generation(self, minconf, itemsets=None, maxconf=None, fixed_consequents=()):
         """

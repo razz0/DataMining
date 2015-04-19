@@ -21,6 +21,10 @@ def support_count(itemset, transactions):
     return len([row for row in transactions if set(itemset) <= set(row)])
 
 
+def support(itemset, transactions):
+    return support_count(itemset, transactions) / float(len(transactions))
+
+
 def _apriori_gen(frequent_sets):
     """
     Generate candidate itemsets
