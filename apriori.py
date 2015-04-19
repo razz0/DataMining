@@ -39,8 +39,9 @@ def _apriori_gen(frequent_sets):
     """
 
     # Sanity check for the input
-    errors = [t for t in frequent_sets if sorted(list(set(t))) != sorted(list(t))]
+    errors = [freq for freq in frequent_sets if sorted(list(set(freq))) != sorted(list(freq))]
     assert not errors, errors
+
     assert sorted(list(set(frequent_sets))) == sorted(frequent_sets), \
         set([(x, frequent_sets.count(x)) for x in frequent_sets if frequent_sets.count(x) > 1])
 
@@ -55,6 +56,47 @@ def _apriori_gen(frequent_sets):
                 break
 
     return new_candidates
+
+
+def _apriori_prune(candidates, transactions, k, frequent_itemsets, minsup):
+    """
+    Prune candidate itemsets
+
+    :param candidates: candidate itemsets
+    :param transactions:
+    :param k:
+    :param frequent_itemsets: list of lists of frequent itemsets grouped by k
+    :param minsup: minimum support
+    """
+
+    # Validate some inputs
+    assert not [cand for cand in candidates if len(cand) != k]
+
+    # Check that items are unique
+    errors = [cand for cand in candidates if sorted(list(set(cand))) != sorted(list(cand))]
+    assert not errors, errors
+
+    N = len(transactions)
+
+    pruned_candidates = candidates
+    support = defaultdict(int)
+
+    for t in transactions:
+        candidate_sets = pruned_candidates  # Remove the already pruned ones
+        for candset in candidate_sets:
+            subsets = generate_transaction_subsets(candset, k - 1)
+            for subset in subsets:
+                if subset not in frequent_itemsets[len(subset)]:
+                    # This candidate is not frequent
+                    pruned_candidates.remove(candset)
+                    break
+            else:
+                if all(candidate in t for candidate in candset):
+                    support[candset] += 1
+
+    pruned_candidates = [item for item in pruned_candidates if support[item] >= N * minsup]
+
+    return pruned_candidates
 
 
 def generate_transaction_subsets(transaction, k):
@@ -135,37 +177,13 @@ def apriori(transactions, all_items, minsup, fixed_k=None, verbose=False):
     pruned_candidates = [True, 'dummy']
 
     while pruned_candidates and len(pruned_candidates) > 1 and (not fixed_k or k < fixed_k):
-        candidate_sets = _apriori_gen(frequent_itemsets[k])
         k += 1
+        candidates = _apriori_gen(frequent_itemsets[k - 1])
+        pruned_candidates = _apriori_prune(candidates, transactions, k, frequent_itemsets, minsup)
         if verbose:
-            print 'k=%s - set count %s - support list length %s' % (k, len(candidate_sets), len(support))
-        if not candidate_sets:
+            print 'k=%s - candidate itemsets: %s - pruned itemsets: %s' % (k, len(candidates), len(pruned_candidates))
+        if not pruned_candidates:
             break
-
-        errors = [t for t in candidate_sets if sorted(list(set(t))) != sorted(list(t))]
-        assert not errors, errors
-
-        pruned_candidates = candidate_sets
-
-        for t in transactions:
-            candidate_sets = pruned_candidates  # Remove the already pruned ones
-            for candset in candidate_sets:
-                subsets = generate_transaction_subsets(candset, k - 1)
-                for subset in subsets:
-                    if subset not in frequent_itemsets[len(subset)]:
-                        # This candidate is not frequent
-                        pruned_candidates.remove(candset)
-                        break
-                else:
-                    if all(candidate in t for candidate in candset):
-                        support[candset] += 1
-
-
-        # Free up some memory
-        #for key in [removable for removable in support.iterkeys() if len(removable) < k]:
-        #    del support[key]
-
-        pruned_candidates = [item for item in pruned_candidates if support[item] >= N * minsup]
 
         frequent_itemsets.append(pruned_candidates)
 
