@@ -38,6 +38,12 @@ def _apriori_gen(frequent_sets):
     [('55015', '55314', '55315')]
     """
 
+    # Sanity check for the input
+    errors = [t for t in frequent_sets if sorted(list(set(t))) != sorted(list(t))]
+    assert not errors, errors
+    assert sorted(list(set(frequent_sets))) == sorted(frequent_sets), \
+        set([(x, frequent_sets.count(x)) for x in frequent_sets if frequent_sets.count(x) > 1])
+
     new_candidates = []
     for index, frequent_item in enumerate(frequent_sets):
         for next_item in frequent_sets[index + 1:]:
@@ -136,7 +142,8 @@ def apriori(transactions, all_items, minsup, fixed_k=None, verbose=False):
         if not candidate_sets:
             break
 
-        #candidate_sets_as_set = set(candidate_sets)
+        errors = [t for t in candidate_sets if sorted(list(set(t))) != sorted(list(t))]
+        assert not errors, errors
 
         pruned_candidates = candidate_sets
 
@@ -149,7 +156,6 @@ def apriori(transactions, all_items, minsup, fixed_k=None, verbose=False):
                         # This candidate is not frequent
                         pruned_candidates.remove(candset)
                         break
-                    #if set([subset]) <= candidate_sets_as_set:
                 else:
                     if all(candidate in t for candidate in candset):
                         support[candset] += 1
@@ -158,8 +164,6 @@ def apriori(transactions, all_items, minsup, fixed_k=None, verbose=False):
         # Free up some memory
         #for key in [removable for removable in support.iterkeys() if len(removable) < k]:
         #    del support[key]
-
-        #print support
 
         pruned_candidates = [item for item in pruned_candidates if support[item] >= N * minsup]
 
