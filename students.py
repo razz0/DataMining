@@ -102,7 +102,7 @@ class Student(object):
         return self.filter_courses(correct_names, grades=grades, timespan=timespan)
 
     def create_course_sequence(self):
-        """Create a sequence (list) of students courses"""
+        """Create a sequence (list) of students' course names"""
         course_dict = {}
         for c in self.courses:
             if c['time'] in course_dict:
@@ -164,10 +164,13 @@ def rule_implication(a, b):
 
 
 def get_course_transactions():
-    return [tuple([course['name'] for course in stud.courses]) for stud in students]
+    return [tuple(set([course['name'] for course in stud.courses])) for stud in students]
 
 
-def get_closed_frequent_itemsets(minsup):
+def get_all_course_names():
+    return list(set([name for (code, name) in all_courses]))  # There are duplicates
+
+def get_closed_frequent_itemsets(minsup, verbose=True):
     """
     Get closed frequent itemsets from the course dataset
 
@@ -175,15 +178,18 @@ def get_closed_frequent_itemsets(minsup):
     :return:
     """
 
-    courses = [name for (code, name) in all_courses]
-    frequent = apriori.apriori(get_course_transactions(), courses, minsup)
+    read_students()
+    courses = get_all_course_names()
+    transactions = get_course_transactions()
+    frequent = apriori.apriori(transactions, courses, minsup, verbose=verbose)
 
-    # TODO: Implement
+    pruned = []
 
-    pruned = frequent
     for itemset in frequent:
-        for itemset in frequent:
-            #if itemset in apriori.
-            pass
+        for itemset_longer in [freq for freq in frequent if len(freq) == len(itemset) + 1]:
+            if itemset in apriori.generate_transaction_subsets(itemset_longer, len(itemset)) and \
+                    apriori.support_count(itemset, transactions) != apriori.support_count(itemset_longer, transactions):
+                pruned += [itemset]
+                break
 
-    return frequent
+    return pruned
