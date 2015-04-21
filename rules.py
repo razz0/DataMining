@@ -33,6 +33,13 @@ class RuleGenerator(object):
 
         return a.support_count(list(set(antecedent) | set(consequent)), self.transactions) / float(ant_sup)
 
+    def support(self, antecedent, consequent):
+        N = len(self.transactions)
+        if N == 0:
+            return 0
+
+        return a.support_count(list(set(antecedent) | set(consequent)), self.transactions) / float(N)
+
     def lift(self, antecedent, consequent):
         sup = a.support_count(antecedent, self.transactions) * a.support_count(consequent, self.transactions)
         if sup == 0:
@@ -52,7 +59,6 @@ class RuleGenerator(object):
         """
         Generate rules ({A, B} -> {C}) from frequent itemsets
 
-        :param frequent_itemsets: list of lists of frequent itemsets grouped by k
         """
         rules = []
 
