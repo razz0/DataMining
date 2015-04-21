@@ -213,12 +213,13 @@ def get_courses_with_categories():
                 grade = 'FAIL'
                 passed = 'FAIL'
 
-            enrolled = int(stud.registration_year)
-            enrolled = '> 2010' if enrolled > 2010 else '<= 2010'
-
             stud_items.append("%s - grade: %s" % (course['name'], grade))
             stud_items.append("%s - passed: %s" % (course['name'], passed))
-            stud_items.append("Enrollment Year %s" % enrolled)
+
+        enrolled = int(stud.registration_year)
+        enrolled = '> 2010' if enrolled > 2010 else '< 2010' if enrolled < 2010 else '2010'
+
+        stud_items.append("Enrollment Year %s" % enrolled)
 
         itemsets.append(stud_items)
 
