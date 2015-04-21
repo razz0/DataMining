@@ -68,7 +68,6 @@ def read_students():
         student.create_course_sequence()
 
 
-
 class Student(object):
     '''Single student course history'''
 
@@ -115,6 +114,7 @@ class Student(object):
         #        course_dict[time] = [(0,)]
 
         self.course_sequence = [tuple(course_dict[key]) for key in sorted(course_dict)]
+
 
 def count_course_attempts(course_name, grades=()):
     '''
@@ -170,6 +170,7 @@ def get_course_transactions():
 def get_all_course_names():
     return list(set([name for (code, name) in all_courses]))  # There are duplicates
 
+
 def get_closed_frequent_itemsets(minsup, verbose=True):
     """
     Get closed frequent itemsets from the course dataset
@@ -192,3 +193,34 @@ def get_closed_frequent_itemsets(minsup, verbose=True):
                 break
 
     return pruned
+
+
+def get_courses_with_categories():
+    '''Transform categorical attributes to items and add them to course transactions'''
+
+    itemsets = []
+    for stud in students:
+        stud_items = []
+        for course in stud.courses:
+            stud_items.append(course['name'])
+            grade = int(course['grade'])
+            passed = 'PASS'
+            if grade >= 4:
+                grade = '4-5'
+            elif grade >= 1:
+                grade = '1-3'
+            else:
+                grade = 'FAIL'
+                passed = 'FAIL'
+
+            enrolled = int(stud.registration_year)
+            enrolled = '> 2010' if enrolled > 2010 else '<= 2010'
+
+            stud_items.append("%s - grade: %s" % (course['name'], grade))
+            stud_items.append("%s - passed: %s" % (course['name'], passed))
+            stud_items.append("Enrollment Year %s" % enrolled)
+
+        itemsets.append(stud_items)
+
+    #alphabet = set([item for itemset in itemsets for item in itemset])
+    return itemsets #, alphabet
