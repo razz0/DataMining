@@ -2,6 +2,7 @@ data.txt
 *.pdf
 
 *.py[co]
+*.pkl
 
 # Packages
 *.egg
