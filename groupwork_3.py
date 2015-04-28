@@ -2,6 +2,7 @@
 from collections import defaultdict, OrderedDict
 import operator
 import pylab
+import pprint
 
 import students as s
 import apriori as a
@@ -15,13 +16,15 @@ combos = defaultdict(int)
 separates = defaultdict(int)
 amounts = defaultdict(int)
 
+# Get simultaneous 2 course combinations and their grade sums
+
 timestamps = sorted(s.timestamps)
-#for time in sorted(s.timestamps)[:50]:
+
 for time_index, time in enumerate(timestamps):
-    print 'Timestamp: %s' % time
+    # print 'Timestamp: %s' % time
     time_start = time
     time_end = time
-    #time_end = timestamps[time_index + 1]
+    # time_end = timestamps[time_index + 1]
     for stud in s.students:
         courses_now = stud.filter_courses(stud.courses, grades=s.PASSED_GRADES, timespan=(time_start, time_end))
         if len(courses_now) < 2:
@@ -41,10 +44,6 @@ for time_index, time in enumerate(timestamps):
                 #print "Combo: %s" % index
                 combos[index] += (int(grade1) + int(grade2)) / 2.0
                 amounts[index] += 1
-
-good_combos = {}
-bad_combos = {}
-good_diffs = {}
 
 uninteresting_courses = ['Säteilykentät ja fotonit',
                          'Johdatus fysiikan opettajan opintoihin',
@@ -69,46 +68,77 @@ uninteresting_courses = ['Säteilykentät ja fotonit',
                          'Ohjaajatuutorointiin osallistuminen, kevätlukukausi',
                          'Ohjaajatuutorointiin osallistuminen, syyslukukausi',
                          'Äidinkieli',
-                         'Mekaniikka',
-                         'Matemaattiset apuneuvot I',
-                         'Suhteellisuusteorian perusteet',
-                         'Kvanttifysiikan perusteet',
+                         'Johdatus yliopistomatematiikkaan',
+                         'Termodynamiikka',
+                         'TVT- ajokortti',
+                         'Termofysiikan perusteet',
+                         'Integroidut TVT-opinnot',
+                         'Vuorovaikutukset ja kappaleet',
                          ]
 
 uninteresting_combos = ['Algebra I &\n Logiikka I',
+                        'Analyysi I &\n Lineaarialgebra ja matriisilaskenta II',
+                        'Analyysi I &\n Johdatus diskreettiin matematiikkaan',
+                        'Lineaarialgebra ja matriisilaskenta II &\n Johdatus diskreettiin matematiikkaan',
+                        'Analyysi II &\n Logiikka I',
+                        'Geometria &\n Logiikka I',
+                        'Matemaattiset apuneuvot I &\n Maailmankaikkeus nyt',
                         ]
 
+grade_sums = {}
+grade_amounts = {}
+
+for (course_code, course_name) in s.all_courses:
+    grade_sum = 0
+    grade_n = 0
+    for stud in s.filter_students_by_courses(s.students, [course_name], grades=s.PASSED_GRADES):
+        courses = stud.get_course_by_name(course_name)
+        grade_sum += sum([int(c['grade']) for c in courses])
+        grade_n += len(courses)
+    if course_name not in grade_sums:
+        grade_sums[course_name] = grade_sum
+        grade_amounts[course_name] = grade_n
+    else:
+        if course_name not in \
+                ['Ohjelmistotekniikan menetelmät', 'Käyttöjärjestelmät', 'TVT-ajokortti', 'Sähkömagnetismi']:
+            raise Exception('Double course name found %s %s' % (course_code, course_name))
+        else:
+            grade_sums[course_name] += grade_sum
+            grade_amounts[course_name] += grade_n
+
+#print grade_sums['Java-ohjelmointi']
+#print grade_amounts['Java-ohjelmointi']
+
+good_diffs = {}
+
 for key in combos:
-    combos[key] /= float(amounts[key])
     index = ' &\n '.join(key)
-    if amounts[key] > 30 and not (set(uninteresting_courses) & set(key)) and not index in uninteresting_combos:
+    if amounts[key] >= 10 and not (set(uninteresting_courses) & set(key)) and index not in uninteresting_combos \
+            and grade_amounts[key[0]] - amounts[key] >= 10 and grade_amounts[key[1]] - amounts[key] >= 10:
 
-        good_combos[index] = combos[key]
+        # good_combos[index] = combos[key] / float(amounts[key])
+        good_diffs[index] = combos[key] / float(amounts[key]) - \
+            ((grade_sums[key[0]] + grade_sums[key[1]]) / 2.0 - combos[key]) / \
+            ((grade_amounts[key[0]] + grade_amounts[key[1]]) / 2.0 - amounts[key])
 
-#        grade_sum = 0
-#        grade_n = 0
-#        for stud in s.students:
-#            courses = stud.filter_courses(stud.courses, grades=s.PASSED_GRADES)
-#            courses = [c for c in courses if c['name'] in key]
-#            grade_sum += sum(courses)
-#            grade_n += 1
-            # TODO: Get difference
+ordered = sorted(good_diffs.items(), key=operator.itemgetter(1))  # Sort by value
 
-ordered = sorted(good_combos.items(), key=operator.itemgetter(1))  # Sort by value
-#print ordered
 good_combos = OrderedDict(ordered[-10:])
-bad_combos = OrderedDict(ordered[10:0:-1])
+bad_combos = OrderedDict(ordered[0:10][::-1])
 
-#combos['Foo & Bar'] = 5.0
-#combos['Bar & Baz'] = 1.0
+print 'Best combos:'
+pprint.pprint(ordered[-1:-10:-1])
 
-#df = Series(good_combos)
+print 'Worst combos:'
+pprint.pprint(ordered[0:10])
+pprint.pprint(bad_combos)
+
 df = DataFrame.from_dict(good_combos, orient='index')
 
 df.plot()
-df.plot(kind='barh', figsize=(18, 10), fontsize=14, legend=False)
-plt.xlabel('Average grade')
-plt.ylabel('Courses')
+df.plot(kind='barh', figsize=(18, 10), fontsize=18, legend=False)
+plt.xlabel('Grade difference', fontsize=24)
+plt.ylabel('Course combinations', fontsize=24)
 #ax = pylab.add_subplot(111)
 #ax.bar( [0,1,2], [1,3,5] )
 #ax.set_xticks( [ 0.5, 1.5, 2.5 ] )
@@ -119,9 +149,9 @@ plt.close()
 
 df = DataFrame.from_dict(bad_combos, orient='index')
 df.plot()
-df.plot(kind='barh', figsize=(18, 10), fontsize=14, legend=False)
-plt.xlabel('Average grade')
-plt.ylabel('Courses')
+df.plot(kind='barh', figsize=(18, 10), fontsize=18, legend=False, color='red')
+plt.xlabel('Grade difference', fontsize=24)
+plt.ylabel('Course combinations', fontsize=24)
 #ax = pylab.add_subplot(111)
 #ax.bar( [0,1,2], [1,3,5] )
 #ax.set_xticks( [ 0.5, 1.5, 2.5 ] )
