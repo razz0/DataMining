@@ -68,7 +68,6 @@ uninteresting_courses = ['Säteilykentät ja fotonit',
                          'Ohjaajatuutorointiin osallistuminen, kevätlukukausi',
                          'Ohjaajatuutorointiin osallistuminen, syyslukukausi',
                          'Äidinkieli',
-                         'Johdatus yliopistomatematiikkaan',
                          'Termodynamiikka',
                          'TVT- ajokortti',
                          'Termofysiikan perusteet',
@@ -131,7 +130,6 @@ pprint.pprint(ordered[-1:-10:-1])
 
 print 'Worst combos:'
 pprint.pprint(ordered[0:10])
-pprint.pprint(bad_combos)
 
 df = DataFrame.from_dict(good_combos, orient='index')
 
